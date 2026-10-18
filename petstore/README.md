@@ -74,16 +74,16 @@ newman run collection/Petstore-API-Tests.postman_collection.json -e environment/
 All 40 tests pass across the 9 requests (Postman Collection Runner, list view).
 
 **Create pets and read a pet**
-![Collection Runner results, part 1](screenshots/collection-runner-1.png)
+![Collection Runner results, part 1](screenshots/collection-runner-1.png.png)
 
 **Get pet details and update status**
-![Collection Runner results, part 2](screenshots/collection-runner-2.png)
+![Collection Runner results, part 2](screenshots/collection-runner-2.png.png)
 
 **Verify update, delete pet, and find by status**
-![Collection Runner results, part 3](screenshots/collection-runner-3.png)
+![Collection Runner results, part 3](screenshots/collection-runner-3.png.png)
 
 **Negative tests**
-![Collection Runner results, part 4](screenshots/collection-runner-4.png)
+![Collection Runner results, part 4](screenshots/collection-runner-4.png.png)
 
 ## Findings
 
