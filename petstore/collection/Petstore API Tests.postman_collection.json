@@ -1,0 +1,387 @@
+{
+  "info": {
+    "_postman_id": "cb616a49-0f28-4332-b366-0cdcce874831",
+    "name": "Petstore API Tests",
+    "description": "API tests for the Swagger Petstore ([https://petstore.swagger.io/v2](https://petstore.swagger.io/v2)).\n\nCovers:\n\n- CRUD: create, read, update and delete a pet\n    \n- Find pets by status\n    \n- Negative tests: malformed JSON body, invalid pet ID, deleted pet returns 404\n    \n\nRun the folders in order (CRUD, FindByStatus, Negative tests). Select the PetStore environment first, with baseUrl set to [https://petstore.swagger.io/v2](https://petstore.swagger.io/v2).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56847449",
+    "_collection_link": "https://go.postman.co/collection/56847449-cb616a49-0f28-4332-b366-0cdcce874831?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "CRUD",
+      "item": [
+        {
+          "name": "Create pets (C)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code verified as 200\",()=>{\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is less than 4000ms\", () => {\r\n    pm.expect(pm.response.responseTime).to.be.below(4000);\r\n});\r\n\r\npm.test(\"Verifying Id as 150\",()=>{\r\n    pm.expect(pm.response.json().id).to.eql(150);\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const pets = [\r\n  { id: 151, name: \"Cat\",         category: { id: 2, name: \"Cats\" } },\r\n  { id: 152, name: \"BlueBird\",    category: { id: 3, name: \"Birds\" } },\r\n  { id: 153, name: \"Shark\",       category: { id: 4, name: \"Fish\" } },\r\n  { id: 154, name: \"RedRabbit\",   category: { id: 5, name: \"Rabbits\" } },\r\n  { id: 155, name: \"GreyHamster\", category: { id: 6, name: \"Hamsters\" } },\r\n  { id: 156, name: \"WhiteRabbit\",   category: { id: 5, name: \"Rabbits\" } },\r\n    { id: 157, name: \"BlackHamster\", category: { id: 6, name: \"Hamsters\" } },\r\n];\r\n\r\npets.forEach(pet => {\r\n  pm.sendRequest({\r\n   url: pm.environment.get(\"baseUrl\") + \"/pet\",\r\n    method: \"POST\",\r\n    header: { \"Content-Type\": \"application/json\" },\r\n    body: {\r\n      mode: \"raw\",\r\n      raw: JSON.stringify({\r\n        id: pet.id,\r\n        name: pet.name,\r\n        category: pet.category,\r\n        photoUrls: [\"https://example.com/pet.jpg\"],\r\n        tags: [{ id: 1, name: \"friendly\" }],\r\n        status: \"available\"\r\n      })\r\n    }\r\n  }, (err, res) => {\r\n  pm.test(pet.name + \" created\", () => pm.expect(res.code).to.eql(200));\r\n});\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 150,\r\n  \"name\": \"Dog\",\r\n  \"category\": { \"id\": 1, \"name\": \"Dogs\" },\r\n  \"photoUrls\": [\"https://example.com/dog.jpg\"],\r\n  \"tags\": [{ \"id\": 1, \"name\": \"friendly\" }],\r\n  \"status\": \"available\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get pet by ID (R)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Verifying ID as 151\",()=>{\r\n    pm.expect(pm.response.json().id).to.eql(151);\r\n});\r\n\r\npm.test(\"Verifying category id as 2\",()=>\r\n{\r\n    pm.expect(pm.response.json().category.id).to.eql(2)\r\n});\r\npm.test(\"Verifying the category name as Cats\",()=>\r\n{\r\n    pm.expect(pm.response.json().category.name).to.equals(\"Cats\")\r\n});\r\n\r\npm.test(\"Verifying name as Cat\",()=>\r\n{\r\n    pm.expect(pm.response.json().name).to.equals(\"Cat\")\r\n});\r\n\r\npm.test(\"Verifying Photourl\",()=>\r\n{\r\n    pm.expect(pm.response.json().photoUrls).to.include(\"https://example.com/pet.jpg\")\r\n});\r\n\r\npm.test(\"Verifying tag Id as 1\",()=>\r\n    { \r\n        pm.expect(pm.response.json().tags[0].id).to.eql(1) \r\n    });\r\npm.test(\"Verifying tag name as friendly\",()=>\r\n    {\r\n          pm.expect(pm.response.json().tags[0].name).to.include(\"friendly\")\r\n    });\r\n\r\npm.test(\"Availability Status\",()=>\r\n{\r\npm.expect(pm.response.json().status).to.equals(\"available\")\r\n\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/151",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "151"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update pet status to sold (U)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => \r\n{\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Status is sold\", () =>\r\n{ \r\n    pm.expect(pm.response.json().status).to.eql(\"sold\");\r\n});\r\npm.test(\"ID is 152\", () =>\r\n{\r\n    pm.expect(pm.response.json().id).to.eql(152);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 152,\r\n  \"name\": \"BlueBird\",\r\n  \"category\": { \"id\": 3, \"name\": \"Birds\" },\r\n  \"photoUrls\": [\"https://example.com/pet.jpg\"],\r\n  \"tags\": [{ \"id\": 1, \"name\": \"friendly\" }],\r\n  \"status\": \"sold\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify pet status is sold (R after U)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", ()=> {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Check Status to be sold\", function () {\r\n    pm.expect(pm.response.json().status).to.equals(\"sold\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/152",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "152"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete pet (D)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response body contains code 200\",()=>\r\n{\r\n    pm.expect(pm.response.json().code).to.equal(200);\r\n});\r\npm.test(\"Delete confirmation contains pet id 157\", () => {\r\n  pm.expect(pm.response.json().message).to.include(\"157\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/157",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "157"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "FindByStatus",
+      "item": [
+        {
+          "name": "Find pets by status - available",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () =>\r\n{\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n\r\npm.test(\"Check animals by id's\",()=>\r\n{\r\n    const pets=pm.response.json();\r\n    const ids=pets.map(pet=>pet.id);\r\npm.expect(ids).to.include(151);\r\n});\r\n\r\npm.test(\"Check animals by searching through the list using id's\",()=>\r\n{\r\n    const pets=pm.response.json();\r\n    const ids=pets.map(p=>p.id);\r\n    [150,151,153,154].forEach(id=>\r\n    pm.expect(ids).to.include(id));\r\n});\r\n\r\npm.test(\"Check all pets are available\",()=>\r\n{\r\n pm.response.json().forEach(pet=>\r\n    {  \r\n        pm.expect(pet.status).to.eql(\"available\")});\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=available",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "available"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative tests",
+      "item": [
+        {
+          "name": "Negative - Malformed JSON body",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 for Bad request\", ()=> {\r\n    pm.expect(pm.response.code).to.eql(400);\r\n});\r\npm.test(\"Response body contains correct message for Bad Input\", () => {\r\n    pm.expect(pm.response.json().message).to.eql(\"bad input\");\r\n});\r\npm.test(\"Type should be unknown\",()=>\r\n{\r\n    pm.expect(pm.response.json().type).to.eql(\"unknown\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"id\": 160,\r\n  \"name\": TestDog,\r\n  \"status\": \"available\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Invalid pet ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404\", ()=> {\r\n    pm.response.to.have.status(404);\r\n});\r\n\r\npm.test(\"Response body contains code 404\", () => {\r\n    pm.expect(pm.response.json().code).to.eql(404);\r\n});\r\n\r\npm.test(\"Check Error mentions NumberFormatException for InvalidID\", () => {\r\n    pm.expect(pm.response.json().message).to.include(\"NumberFormatException\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/44F",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "44F"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Negative - Get deleted pet returns 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Check 404 code not found for id 157\",()=>\r\n{\r\npm.response.to.have.status(404)\r\n});\r\n\r\npm.test(\"Message says Pet not found\", () => {\r\n  pm.expect(pm.response.json().message).to.eql(\"Pet not found\");\r\n});\r\n\r\npm.test(\"Response is JSON\", () => {\r\n  pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/157",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "157"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
